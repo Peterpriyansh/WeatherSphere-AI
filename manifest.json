@@ -1,0 +1,10 @@
+{
+  "name": "Atmos Weather",
+  "short_name": "Atmos",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "description": "A modern weather dashboard with live forecasts, map, AQI, and charts."
+}
