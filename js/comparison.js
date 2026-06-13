@@ -1,109 +1,74 @@
-function comparisonWeatherInfo(code) {
-  const map = {
-    0: { label: "Clear", icon: "☀️" },
-    1: { label: "Mainly Clear", icon: "🌤️" },
-    2: { label: "Partly Cloudy", icon: "⛅" },
-    3: { label: "Overcast", icon: "☁️" },
-    45: { label: "Fog", icon: "🌫️" },
-    48: { label: "Fog", icon: "🌫️" },
-    51: { label: "Drizzle", icon: "🌦️" },
-    53: { label: "Drizzle", icon: "🌦️" },
-    55: { label: "Drizzle", icon: "🌧️" },
-    61: { label: "Rain", icon: "🌧️" },
-    63: { label: "Rain", icon: "🌧️" },
-    65: { label: "Heavy Rain", icon: "🌧️" },
-    71: { label: "Snow", icon: "❄️" },
-    73: { label: "Snow", icon: "❄️" },
-    75: { label: "Heavy Snow", icon: "❄️" },
-    80: { label: "Showers", icon: "🌦️" },
-    81: { label: "Showers", icon: "🌦️" },
-    82: { label: "Heavy Showers", icon: "⛈️" },
-    95: { label: "Thunderstorm", icon: "⛈️" },
-    96: { label: "Thunderstorm", icon: "⛈️" },
-    99: { label: "Thunderstorm", icon: "⛈️" }
-  };
+async function fetchCitySnapshot(city){
 
-  return map[code] || { label: "Weather", icon: "🌡️" };
-}
+  const geo =
+  await fetch(
+  `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
+  );
 
-async function fetchCitySnapshot(city) {
-  const geoUrl = new URL("https://geocoding-api.open-meteo.com/v1/search");
-  geoUrl.searchParams.set("name", city);
-  geoUrl.searchParams.set("count", "1");
-  geoUrl.searchParams.set("language", "en");
+  const geoData = await geo.json();
 
-  const geoResponse = await fetch(geoUrl.toString());
-  const geoData = await geoResponse.json();
+  if(!geoData.results?.length)
+  return null;
 
-  if (!geoData.results || !geoData.results.length) {
-    throw new Error(`No geocoding result for ${city}`);
-  }
+  const place =
+  geoData.results[0];
 
-  const place = geoData.results[0];
+  const weather =
+  await fetch(
+  `https://api.open-meteo.com/v1/forecast?latitude=${place.latitude}&longitude=${place.longitude}&current=temperature_2m,weather_code`
+  );
 
-  const weatherUrl = new URL("https://api.open-meteo.com/v1/forecast");
-  weatherUrl.searchParams.set("latitude", place.latitude);
-  weatherUrl.searchParams.set("longitude", place.longitude);
-  weatherUrl.searchParams.set("current", "temperature_2m,weather_code,relative_humidity_2m,wind_speed_10m");
-  weatherUrl.searchParams.set("timezone", "auto");
-
-  const weatherResponse = await fetch(weatherUrl.toString());
-  const weatherData = await weatherResponse.json();
+  const weatherData =
+  await weather.json();
 
   return {
     city: place.name,
-    temperature: Math.round(weatherData.current?.temperature_2m ?? 0),
-    humidity: Math.round(weatherData.current?.relative_humidity_2m ?? 0),
-    wind: Math.round(weatherData.current?.wind_speed_10m ?? 0),
-    code: weatherData.current?.weather_code ?? 0,
-    label: comparisonWeatherInfo(weatherData.current?.weather_code ?? 0).label,
-    icon: comparisonWeatherInfo(weatherData.current?.weather_code ?? 0).icon
+    temp: weatherData.current.temperature_2m
   };
 }
 
-async function renderComparison(cities) {
-  const summary = document.getElementById("comparisonSummary");
-  if (!summary) return [];
+async function renderComparison(cities){
 
-  const uniqueCities = [...new Set((cities || []).map(c => String(c || "").trim()).filter(Boolean))].slice(0, 4);
-  if (!uniqueCities.length) return [];
+  const summary =
+  document.getElementById(
+  "comparisonSummary"
+  );
 
-  summary.innerHTML = `<span class="empty-state">Loading comparison...</span>`;
+  summary.innerHTML =
+  "Loading comparison...";
 
   const results = [];
-  for (const city of uniqueCities) {
-    try {
-      const snap = await fetchCitySnapshot(city);
-      results.push(snap);
-    } catch {
-      // skip failures
-    }
+
+  for(const city of cities){
+
+    const data =
+    await fetchCitySnapshot(city);
+
+    if(data)
+      results.push(data);
   }
 
-  if (!results.length) {
-    summary.innerHTML = `<span class="empty-state">Comparison unavailable.</span>`;
-    return [];
-  }
+  summary.innerHTML="";
 
-  const labels = results.map(item => item.city);
-  const temps = results.map(item => item.temperature);
+  results.forEach(item=>{
 
-  if (window.AtmosCharts) {
-    window.AtmosCharts.drawComparisonChart(labels, temps);
-  }
-
-  summary.innerHTML = "";
-  results.forEach(item => {
-    const card = document.createElement("div");
-    card.className = "comparison-item";
-    card.innerHTML = `
-      <h4>${item.icon} ${item.city}</h4>
-      <p>${item.temperature}°C · ${item.label}<br/>Humidity ${item.humidity}% · Wind ${item.wind} km/h</p>
+    summary.innerHTML += `
+      <div class="comparison-item">
+        <h4>${item.city}</h4>
+        <p>${item.temp}°C</p>
+      </div>
     `;
-    summary.appendChild(card);
   });
 
-  return results;
+  if(window.AtmosCharts){
+
+    window.AtmosCharts
+    .drawComparisonChart(
+      results.map(x=>x.city),
+      results.map(x=>x.temp)
+    );
+
+  }
 }
 
 window.AtmosComparison = {

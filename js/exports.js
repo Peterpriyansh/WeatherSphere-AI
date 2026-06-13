@@ -1,68 +1,53 @@
-function exportWeatherReport() {
-  const state = window.weatherAppState;
-  if (!state || !state.current) {
-    alert("Load weather data first.");
-    return;
-  }
+document
+.getElementById("exportBtn")
+?.addEventListener("click",()=>{
 
-  const city = state.city || "Atmos";
-  const lines = [
-    "Atmos Weather Report",
-    `City: ${city}`,
-    `Temperature: ${Math.round(state.current.temperature_2m)}°C`,
-    `Feels Like: ${Math.round(state.current.apparent_temperature)}°C`,
-    `Humidity: ${Math.round(state.current.relative_humidity_2m)}%`,
-    `Wind: ${Math.round(state.current.wind_speed_10m)} km/h`,
-    `Pressure: ${Math.round(state.current.pressure_msl)} hPa`,
-    `Visibility: ${formatVisibility(state.current.visibility)}`,
-    `UV Index: ${Math.round(state.current.uv_index ?? 0)}`,
-    `AQI: ${state.aqi ?? "--"}`,
-    `Condition: ${state.conditionLabel || "Weather data"}`
-  ];
+const { jsPDF } = window.jspdf;
 
-  const content = lines.join("\n");
+const doc = new jsPDF();
 
-  const jsPDF = window.jspdf && window.jspdf.jsPDF;
-  if (jsPDF) {
-    const pdf = new jsPDF({ unit: "mm", format: "a4" });
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(18);
-    pdf.text("Atmos Weather Report", 14, 18);
+doc.setFontSize(22);
 
-    pdf.setFont("helvetica", "normal");
-    pdf.setFontSize(11);
+doc.text(
+"WeatherSphere AI Report",
+20,
+20
+);
 
-    const wrapped = pdf.splitTextToSize(content, 180);
-    pdf.text(wrapped, 14, 32);
+doc.setFontSize(12);
 
-    pdf.save(`Atmos-Weather-${sanitizeFileName(city)}.pdf`);
-    return;
-  }
+doc.text(
+`City: ${
+document.getElementById("cityName").textContent
+}`,
+20,
+40
+);
 
-  downloadText(`Atmos-Weather-${sanitizeFileName(city)}.txt`, content, "text/plain");
-}
+doc.text(
+`Temperature: ${
+document.getElementById("temp").textContent
+}`,
+20,
+50
+);
 
-function downloadText(filename, content, mimeType) {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
+doc.text(
+`Condition: ${
+document.getElementById("condition").textContent
+}`,
+20,
+60
+);
 
-function sanitizeFileName(name) {
-  return String(name).replace(/[^\w.-]+/g, "_");
-}
+doc.text(
+`Humidity: ${
+document.getElementById("humidity").textContent
+}`,
+20,
+70
+);
 
-window.AtmosExport = {
-  exportWeatherReport
-};
+doc.save("WeatherSphere_Report.pdf");
 
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("exportBtn");
-  if (btn) {
-    btn.addEventListener("click", exportWeatherReport);
-  }
 });

@@ -477,3 +477,69 @@ body.theme-light .day-row,
 body.theme-light .comparison-item{
   box-shadow: 0 18px 45px rgba(21, 41, 91, 0.08);
 }
+.ai-box{
+padding:20px;
+border-radius:20px;
+background:rgba(255,255,255,.06);
+border:1px solid rgba(255,255,255,.08);
+}
+
+.ai-box h3{
+margin-top:0;
+}
+
+.comparison-item{
+transition:.3s;
+}
+
+.comparison-item:hover{
+transform:translateY(-4px);
+}
+
+canvas{
+border-radius:20px;
+}
+.glass{
+transition:.35s;
+}
+
+.glass:hover{
+transform:translateY(-5px);
+box-shadow:
+0 25px 60px rgba(0,0,0,.25),
+0 0 25px rgba(105,168,255,.25);
+}
+
+.news-card{
+padding:18px;
+border-radius:18px;
+margin-bottom:12px;
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+}
+
+.temperature{
+text-shadow:
+0 0 20px rgba(124,219,255,.5),
+0 0 50px rgba(124,219,255,.3);
+}
+
+.metric{
+animation:floatCard 4s ease-in-out infinite;
+}
+
+@keyframes floatCard{
+
+0%{
+transform:translateY(0);
+}
+
+50%{
+transform:translateY(-6px);
+}
+
+100%{
+transform:translateY(0);
+}
+
+}

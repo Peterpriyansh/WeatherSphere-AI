@@ -10,37 +10,51 @@ function renderAIInsight(payload) {
     weatherCode = 0
   } = payload || {};
 
-  const lines = [];
+  let outfit = "";
+  let activity = "";
+  let risk = "";
 
-  if (temperature >= 42) {
-    lines.push("Extreme heat detected. Stay indoors during peak hours.");
-  } else if (temperature >= 32) {
-    lines.push("Warm weather. Light clothing and water are a good idea.");
-  } else if (temperature >= 20) {
-    lines.push("Pleasant conditions. Great for outdoor plans.");
+  if (temperature >= 35) {
+    outfit = "👕 Light cotton clothes, sunglasses and hydration recommended.";
+  } else if (temperature >= 25) {
+    outfit = "🩳 Casual comfortable clothing recommended.";
+  } else if (temperature >= 15) {
+    outfit = "🧥 Light jacket recommended.";
   } else {
-    lines.push("Cool weather. A jacket will help later in the day.");
+    outfit = "🧣 Warm jacket and layered clothing recommended.";
   }
 
-  if (humidity >= 80) {
-    lines.push("High humidity may make it feel warmer than the reading.");
+  if (weatherCode >= 51) {
+    activity = "☔ Rain expected. Carry an umbrella.";
+  } else {
+    activity = "🌤 Great weather for outdoor activities.";
   }
 
-  if (windSpeed >= 30) {
-    lines.push("Wind is strong enough to feel noticeable outdoors.");
+  if (windSpeed > 35) {
+    risk += " 💨 Strong winds expected.";
   }
 
-  if (aqi !== null && aqi >= 151) {
-    lines.push("Air quality is low, so reduce prolonged outdoor exposure.");
+  if (humidity > 85) {
+    risk += " 💧 High humidity may feel uncomfortable.";
   }
 
-  if ([51, 53, 55, 61, 63, 65, 80, 81, 82, 95, 96, 99].includes(weatherCode)) {
-    lines.push("Rain activity is possible. Keep an umbrella ready.");
+  if (aqi && aqi > 150) {
+    risk += " 😷 Poor air quality detected.";
   }
 
-  const text = lines.join(" ");
-  el.textContent = text;
-  return text;
+  el.innerHTML = `
+      <div class="ai-box">
+        <h3>🤖 AI Weather Assistant</h3>
+
+        <p><strong>Outfit:</strong> ${outfit}</p>
+
+        <p><strong>Suggestion:</strong> ${activity}</p>
+
+        <p><strong>Alerts:</strong> ${risk || "No major risks detected."}</p>
+      </div>
+  `;
+
+  return el.innerText;
 }
 
 window.AtmosAI = {
