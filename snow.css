@@ -1,0 +1,47 @@
+body.weather-rainy #rainLayer{
+  opacity:1;
+}
+
+#rainLayer::before,
+#rainLayer::after{
+  content:"";
+  position:absolute;
+  inset:-30% -20%;
+  background-repeat:repeat;
+  transform:rotate(12deg);
+}
+
+#rainLayer::before{
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(255,255,255,0) 0px,
+    rgba(255,255,255,0) 12px,
+    rgba(180,220,255,0.28) 12px,
+    rgba(180,220,255,0.28) 13px
+  );
+  background-size: 100% 24px;
+  animation: rain-fall 0.65s linear infinite;
+  filter: blur(0.3px);
+}
+
+#rainLayer::after{
+  background-image: repeating-linear-gradient(
+    180deg,
+    rgba(255,255,255,0) 0px,
+    rgba(255,255,255,0) 18px,
+    rgba(150,200,255,0.18) 18px,
+    rgba(150,200,255,0.18) 19px
+  );
+  background-size: 100% 36px;
+  animation: rain-fall 1s linear infinite;
+  opacity:0.55;
+}
+
+@keyframes rain-fall{
+  from{
+    transform:translateY(-10%) rotate(12deg);
+  }
+  to{
+    transform:translateY(18%) rotate(12deg);
+  }
+}

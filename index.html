@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atmos Weather</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/responsive.css" />
+  <link rel="stylesheet" href="css/weather-effects.css" />
+  <link rel="stylesheet" href="css/rain.css" />
+  <link rel="stylesheet" href="css/snow.css" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body class="theme-dark">
+
+  <div id="rainLayer" class="fx-layer"></div>
+  <div id="snowLayer" class="fx-layer"></div>
+  <div id="cloudLayer" class="fx-layer"></div>
+
+  <div class="app-shell">
+    <header class="topbar glass">
+      <div class="brand">
+        <div class="brand-mark">☁</div>
+        <div>
+          <h1>Atmos</h1>
+          <p>Live weather intelligence</p>
+        </div>
+      </div>
+
+      <div class="searchbar">
+        <input id="cityInput" type="text" placeholder="Search city..." autocomplete="off" />
+        <button id="searchBtn" class="btn primary">Search</button>
+        <button id="locationBtn" class="btn">📍</button>
+        <button id="voiceBtn" class="btn">🎙</button>
+        <button id="favoriteBtn" class="btn">☆</button>
+        <button id="themeToggle" class="btn">◐</button>
+        <button id="exportBtn" class="btn">Export</button>
+      </div>
+    </header>
+
+    <div id="errorBanner" class="error-banner hidden"></div>
+
+    <section id="loadingSkeleton" class="loading-skeleton hidden glass">
+      <div class="sk-header"></div>
+      <div class="sk-row">
+        <div class="sk-card"></div>
+        <div class="sk-card"></div>
+        <div class="sk-card"></div>
+        <div class="sk-card"></div>
+      </div>
+      <div class="sk-row">
+        <div class="sk-wide"></div>
+      </div>
+    </section>
+
+    <main class="page-grid">
+      <section class="hero-card glass">
+        <div class="hero-left">
+          <div class="eyebrow" id="locationText">Current location</div>
+          <h2 id="cityName">Delhi</h2>
+          <p id="dateText">Monday, June 29</p>
+          <p id="condition" class="condition">Mostly Cloudy</p>
+          <div id="highLow" class="highlow">H:34° L:26°</div>
+        </div>
+
+        <div class="hero-right">
+          <div id="temp" class="temperature">31°</div>
+          <div class="subtle">Feels like <span id="feelsLike">33°</span></div>
+        </div>
+      </section>
+
+      <section class="favorites-card glass">
+        <div class="section-title">Favorites</div>
+        <div id="favorites" class="favorites"></div>
+      </section>
+
+      <section class="stats-grid">
+        <div class="metric glass">
+          <h3>Humidity</h3>
+          <p id="humidity">64%</p>
+        </div>
+        <div class="metric glass">
+          <h3>Wind</h3>
+          <p id="wind">12 km/h</p>
+        </div>
+        <div class="metric glass">
+          <h3>Pressure</h3>
+          <p id="pressure">1012 hPa</p>
+        </div>
+        <div class="metric glass">
+          <h3>UV Index</h3>
+          <p id="uv">6</p>
+        </div>
+        <div class="metric glass">
+          <h3>Air Quality</h3>
+          <p id="aqi">--</p>
+        </div>
+        <div class="metric glass">
+          <h3>Sunrise</h3>
+          <p id="sunrise">--</p>
+        </div>
+        <div class="metric glass">
+          <h3>Sunset</h3>
+          <p id="sunset">--</p>
+        </div>
+        <div class="metric glass">
+          <h3>Visibility</h3>
+          <p id="visibility">10 km</p>
+        </div>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title">Weather Alert</div>
+        <p id="weatherAlert" class="alert-text">No alerts.</p>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title">Hourly Forecast</div>
+        <div id="hourlyForecast" class="hourly-scroll"></div>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title">7-Day Forecast</div>
+        <div id="dailyForecast" class="daily-list"></div>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title">Temperature Trend</div>
+        <canvas id="weatherChart"></canvas>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title">City Comparison</div>
+        <canvas id="comparisonChart"></canvas>
+        <div id="comparisonSummary" class="comparison-summary"></div>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title">Weather Map</div>
+        <div id="map" class="map-box"></div>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title">3D Globe</div>
+        <canvas id="globeCanvas" class="globe-canvas"></canvas>
+      </section>
+
+      <section class="glass panel">
+        <div class="section-title">AI Weather Insight</div>
+        <p id="aiInsight" class="ai-text">Weather analysis will appear here.</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script src="js/theme.js"></script>
+  <script src="js/favorites.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/aqi.js"></script>
+  <script src="js/alerts.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/ai.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/comparison.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/globe.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
